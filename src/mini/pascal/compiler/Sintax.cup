@@ -1,0 +1,43 @@
+package mini.pascal.compiler;
+
+import java_cup.runtime.*;
+import java.io.FileReader;
+import pascal.ast.*;
+
+parser code {:
+
+	public PascalProgram root = null;
+
+	public void report_error(String message, Object info) {
+		StringBuilder m = new StringBuilder("Sintax Error");
+		if (info instanceof java_cup.runtime.Symbol) {
+			java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+			if (s.left >= 0) {
+				m.append(" at line "+(s.left+1));
+				if (s.right >= 0)
+					m.append(", column "+(s.right+1));
+			}
+		}
+		m.append(" : "+message);
+		System.err.println(m);
+	}
+
+	public void report_fatal_error(String message, Object info) {
+		report_error(message, info);
+		System.exit(1);
+	}
+
+	public void syntax_error(Symbol cur_token) {
+		report_error("on Token "+ cur_token.value, cur_token);
+	}
+
+	public static void main(String[] args){
+		try {
+			parser asin = new parser(
+					new Lexer( new FileReader(args[0])));
+			Object result = asin.parse().value;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+:};

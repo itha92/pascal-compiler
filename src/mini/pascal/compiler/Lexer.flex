@@ -1,4 +1,4 @@
-package pascal.compiler;
+package mini.pascal.compiler;
 
 import java_cup.runtime.*;
 import java.io.Reader;
