@@ -66,34 +66,17 @@ id = {letter}({letter}|{digit}|[_])*
 	"end"			{ return symbol("end", sym.END); }
 	"and"			{ return symbol("and", sym.AND); }
 	"array"			{ return symbol("array", sym.ARRAY); }
-	"const"			{ return symbol("const", sym.CONST); }
 	"div"			{ return symbol("div", sym.DIV); }
 	"do"			{ return symbol("do", sym.DO); }
 	"else"			{ return symbol("else", sym.ELSE); }
-	"for"			{ return symbol("for", sym.FOR); }
-	"in"			{ return symbol("in", sym.IN); }
-	"function"		{ return symbol("function", sym.FUNCTION); }
 	"if"			{ return symbol("if", sym.IF); }
-	"nil"			{ return symbol("nil", sym.NIL); }
 	"not"			{ return symbol("not", sym.NOT); }
 	"of"			{ return symbol("of", sym.OF); }
 	"or"			{ return symbol("or", sym.OR); }
 	"procedure"		{ return symbol("procedure", sym.PROCEDURE); }
-	"record"		{ return symbol("record", sym.RECORD); }
 	"then"			{ return symbol("then", sym.THEN); }
-	"to"			{ return symbol("to", sym.TO); }
-	"downto"		{ return symbol("downto", sym.DOWNTO); }
-	"type"			{ return symbol("type", sym.TYPE); }
-	"set"			{ return symbol("set", sym.SET); }
 	"var"			{ return symbol("var", sym.VAR); }
-	"file"			{ return symbol("file", sym.FILE); }
 	"while"			{ return symbol("while", sym.WHILE); }
-	"packed"		{ return symbol("packed", sym.PACKED); }
-	"case"			{ return symbol("case", sym.CASE); }
-	"forward"		{ return symbol("forward", sym.FORWARD); }
-	"repeat"		{ return symbol("repeat", sym.REPEAT); }
-	"until"			{ return symbol("until", sym.UNTIL); }
-	"with"			{ return symbol("with", sym.WITH); }
 	"("				{ return symbol("(", sym.LEFT_PAR); }
 	")"				{ return symbol(")", sym.RIGHT_PAR); }
 	"["				{ return symbol("[", sym.LEFT_BRACKET); }
