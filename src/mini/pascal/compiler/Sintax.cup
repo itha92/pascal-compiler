@@ -2,7 +2,7 @@ package mini.pascal.compiler;
 
 import java_cup.runtime.*;
 import java.io.FileReader;
-import pascal.ast.*;
+import mini.pascal.ast.*;
 
 parser code {:
 
@@ -33,7 +33,7 @@ parser code {:
 
 	public static void main(String[] args){
 		try {
-			parser asin = new parser(
+			Parser asin = new Parser(
 					new Lexer( new FileReader(args[0])));
 			Object result = asin.parse().value;
 		} catch (Exception ex) {
@@ -41,3 +41,25 @@ parser code {:
 		}
 	}
 :};
+
+terminal  PROGRAM, BEGIN, END, AND, ARRAY, DIV, DO, ELSE,
+		  IF, NOT, OF, OR, PROCEDURE, THEN, VAR, WHILE, QUOTE,
+		  LEFT_PAR, RIGHT_PAR, LEFT_BRACKET, RIGHT_BRACKET,
+		  SEMICOLON, COLON, COMMA, DOT, ASIGN, PLUS, MINUS,
+		  DIVIDE, PRODUCT, XOR, MOD, EQUALS, NOT_EQUAL,
+		  GREATER_THAN, LESS_THAN, GREATER_EQUALS, LESS_EQUAL,
+		  INTEGER, ID, STRING, CHAR, LEFT_KEY, WRITE_LN, READ_LN,
+		  BOOLEAN, INT_CONST, TRUE, FALSE, CHAR_CONS, RIGHT_KEY;
+terminal String STRING_LITERAL;
+
+non terminal pascalProgram, empty;
+
+start with pascalProgram;
+
+pascalProgram::=
+								empty {:
+								:}
+							;
+
+empty::=
+							;

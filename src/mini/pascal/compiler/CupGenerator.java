@@ -16,7 +16,7 @@ public class CupGenerator {
         params[0] = "-destdir";
         params[1] = "src/mini/pascal/compiler/";
         params[2] = "-parser";
-        params[3] = "parser";
+        params[3] = "Parser";
         params[4] = "src/mini/pascal/compiler/Sintax.cup";
         try {
             java_cup.Main.main(params);

@@ -32,9 +32,9 @@ public class MiniPascalCompiler {
         CupGenerator.main(args);
         Reader reader;
         try {
-            reader = new BufferedReader(new FileReader("./test/func.pas"));
+            reader = new BufferedReader(new FileReader("./test/empty.pas"));
             Lexer lexer = new Lexer(reader);
-            
+
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
             mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
@@ -44,12 +44,12 @@ public class MiniPascalCompiler {
                 .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             //mapper.setVisibility(JsonMethod.FIELD, Visibility.ANY);
-           
+
             Parser cupParser = new Parser(lexer);
             cupParser.parse();
-            mapper.writeValue(new File("./src/pascal/compiler/AST.json"), cupParser.root);
+            //mapper.writeValue(new File("./src/pascal/compiler/AST.json"), cupParser.root);
 
-            
+
         } catch (FileNotFoundException ex) {
             System.out.println(ex);
             Logger.getLogger(MiniPascalCompiler.class.getName()).log(Level.SEVERE, null, ex);
@@ -61,5 +61,5 @@ public class MiniPascalCompiler {
             Logger.getLogger(MiniPascalCompiler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
 }
