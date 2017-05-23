@@ -34,32 +34,131 @@ parser code {:
 	public static void main(String[] args){
 		try {
 			Parser asin = new Parser(
-					new Lexer( new FileReader(args[0])));
+				new Lexer( new FileReader(args[0])));
 			Object result = asin.parse().value;
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-:};
+	:};
 
-terminal  PROGRAM, BEGIN, END, AND, ARRAY, DIV, DO, ELSE,
-		  IF, NOT, OF, OR, PROCEDURE, THEN, VAR, WHILE, QUOTE,
-		  LEFT_PAR, RIGHT_PAR, LEFT_BRACKET, RIGHT_BRACKET,
-		  SEMICOLON, COLON, COMMA, DOT, ASIGN, PLUS, MINUS,
-		  DIVIDE, PRODUCT, XOR, MOD, EQUALS, NOT_EQUAL,
-		  GREATER_THAN, LESS_THAN, GREATER_EQUALS, LESS_EQUAL,
-		  INTEGER, ID, STRING, CHAR, LEFT_KEY, WRITE_LN, READ_LN,
-		  BOOLEAN, INT_CONST, TRUE, FALSE, CHAR_CONS, RIGHT_KEY;
-terminal String STRING_LITERAL;
+	terminal  PROGRAM, BEGIN, END, AND, ARRAY, DIV, DO, ELSE,
+	IF, NOT, OF, OR, PROCEDURE, THEN, VAR, WHILE, QUOTE,
+	LEFT_PAR, RIGHT_PAR, LEFT_BRACKET, RIGHT_BRACKET,
+	SEMICOLON, COLON, COMMA, DOT, ASIGN, PLUS, MINUS,
+	DIVIDE, PRODUCT, XOR, MOD, EQUALS, NOT_EQUAL,
+	GREATER_THAN, LESS_THAN, GREATER_EQUALS, LESS_EQUAL,
+	INTEGER, ID, STRING, CHAR, LEFT_KEY, WRITE_LN, READ_LN,
+	BOOLEAN, INT_CONST, TRUE, FALSE, CHAR_CONS, RIGHT_KEY;
+	terminal String STRING_LITERAL;
 
-non terminal pascalProgram, empty;
+	non terminal pascalProgram, empty;
 
-start with pascalProgram;
+	start with pascalProgram;
 
-pascalProgram::=
-								empty {:
-								:}
-							;
+	pascalProgram::= PROGRAM:pro ID:id SEMICOLON:sc block:block DOT:dt {:
+		PascalProgram r = new PascalProgram((String) pro, (String) id, block, (String) sc, (String) dt);
+		RESULT = r;
+		
+		:} 
+		;
 
-empty::=
-							;
+	block::= variableDeclarationPart:vdp, statementPart:sp {:
+		Block r = new Block(vdp, pdp, sp);
+		RESULT = r;
+		
+		:}
+		;
+
+	variableDeclarationPart::= VAR:var variableDeclarationList:vdl {:
+		VariableDeclarationPart r = new VariableDeclarationPart((String)var, vdl);
+		:}
+		|
+	empty:empty {:
+		:}
+		;
+
+	variableDeclarationList::= variableDeclaration:vd {:
+			VariableDeclaration r = new VariableDeclaration(vd);
+			RESULT = r;
+			:}
+			|
+		variableDeclaration:vd identifierList:il COLON:c type:t SEMICOLON:sc{:
+			VariableDeclaration r = new VariableDeclaration(vd, il, (String) c, t, (String)sc);
+			RESULT = r;
+			:}
+			;
+
+	variableDeclaration::= identifierList:il COLON:c type:t SEMICOLON:sc {:
+			VariableDeclaration r = new VariableDeclaration( il, (String) c, t, (String)sc);
+			RESULT = r;
+		:};
+
+
+	identifierList::= ID:id {:
+			IdentifierList r = new IdentifierList((String) id);
+			RESULT = r;
+			:}
+			|
+		identifierList:il COMMA:c ID:id {:
+			IdentifierList r = new IdentifierList((String) id, (String) c, il);
+			RESULT = r;
+			:}
+			;
+	type::= simpleType:st {:
+		Type r = new Type(st);
+		RESULT = r;
+		:}
+		| 
+		arrayType:at {:
+		Type r = new Type(at);
+		RESULT = r;
+			:}
+		;
+
+	arrayType::= ARRAY:arr LEFT_BRACKET:lb indexRange:ir RIGHT_BRACKET:rb OF:of simpleType:st {:
+			ArrayType r = new ArrayType((String)arr, (String)lb, ir, (String)rb, (String)of, st);
+			RESULT = r;
+		:}
+		;
+
+	indexRange::= INTEGER:integer1 DOT:dt1 DOT:dt2 INTEGER:integer2 {:
+			IndexRange r = new IndexRange((String)integer1, (String)dt1, (String)dt2, (String)integer2);
+			RESULT = r;
+		:}
+ 
+	simpleType::= IDENTIFIER:id {:
+		SimpleType r = new SimpleType((String)id);
+		RESULT = r;
+		:};
+
+	statementPart::= compoundStatement:cs {:
+		StatementPart r = new StatementPart(cs);
+		RESULT = r;
+		:}
+
+	compoundStatement::= BEGIN:bg statementList:sl END:end{:
+		CompoundStatement r = new CompoundStatement((String)bg, sl, (String)end);
+		RESULT = r;
+		:}
+
+	statementList::= statement:stm {:
+			StatementList r = new StatementList(stm);
+			RESULT = r;
+				:}
+	|
+	statementList:sl SEMICOLON:sc statement:stm  {:
+			StatementList r = new StatementList(sl, (String)sc, stm);
+			RESULT = r;
+			:}
+	;
+
+	statement::= simpleStateme
+
+
+<statement> ::=	<simple statement> | <structured statement>
+
+
+
+	empty::=
+	;
