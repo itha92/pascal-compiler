@@ -27,6 +27,12 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 	int commentLine;
 	StringBuffer string = new StringBuffer();
 
+	SymTable symtab;          // externe symbol table
+
+	public void setSymtab(SymTable symtab) {
+		this.symtab = symtab;
+	}
+
 	private Symbol symbol(String name, int sym) {
 		//System.out.println("name: " + name + " sym: " + sym);
 		return new Symbol(sym, yyline, yycolumn);
@@ -108,7 +114,10 @@ id = {letter}({letter}|{digit}|[_])*
 	{letter}		{ return symbol("charconst", sym.CHAR_CONS, yytext()); }
 	{integer}		{ return symbol("integerconst", sym.INT_CONST, yytext()); }
 
-	{id}			{ return symbol("id", sym.ID, yytext()); }
+	{id}			{ Symbol newsym = symbol("id", sym.ID, yytext());
+					  symtab.enter(yytext(), newsym);
+					  return newsym;
+					}
 
 	.				{ error("Illegal character <"+ yytext()+"> @ Line " + (yyline+1)); }
 }

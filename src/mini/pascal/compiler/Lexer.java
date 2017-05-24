@@ -396,6 +396,12 @@ public class Lexer implements java_cup.runtime.Scanner {
 	int commentLine;
 	StringBuffer string = new StringBuffer();
 
+	SymTable symtab;          // externe symbol table
+
+	public void setSymtab(SymTable symtab) {
+		this.symtab = symtab;
+	}
+
 	private Symbol symbol(String name, int sym) {
 		//System.out.println("name: " + name + " sym: " + sym);
 		return new Symbol(sym, yyline, yycolumn);
@@ -910,7 +916,9 @@ public class Lexer implements java_cup.runtime.Scanner {
             }
           case 88: break;
           case 28: 
-            { return symbol("id", sym.ID, yytext());
+            { Symbol newsym = symbol("id", sym.ID, yytext());
+					  symtab.enter(yytext(), newsym);
+					  return newsym;
             }
           case 89: break;
           case 29: 
