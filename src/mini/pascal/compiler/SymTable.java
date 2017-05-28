@@ -14,7 +14,7 @@ import java.util.Map;
  * @author jorgecaballero
  */
 public class SymTable {
-    Map<String, Symbol> m;
+    Map<String, String> m;
     SymTable padre;
     
     public SymTable(){
@@ -22,18 +22,18 @@ public class SymTable {
     }
     
     public SymTable(SymTable p) {
-        m = new HashMap<String,Symbol>();
+        m = new HashMap<String,String>();
         padre = p;
     }
     
-    public boolean enter(String s, Symbol e) {
+    public boolean enter(String s, String e) {
         Object value = lookup(s);
         m.put(s, e);
         return(value==null);
     }
     
-    public Symbol lookup(String s) {
-        Symbol value = m.get(s);
+    public String lookup(String s) {
+        String value = m.get(s);
         if (value==null && padre!=null)
             value = padre.lookup(s);
         return value;

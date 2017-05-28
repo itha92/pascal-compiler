@@ -31,7 +31,7 @@ public class MiniPascalCompiler {
         Reader reader;
         SymTable symtab = new SymTable();
         try {
-            reader = new BufferedReader(new FileReader("./test/empty.pas"));
+            reader = new BufferedReader(new FileReader("./test/func.pas"));
             Lexer lexer = new Lexer(reader);
             lexer.setSymtab(symtab);
             ObjectMapper mapper = new ObjectMapper();

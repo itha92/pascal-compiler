@@ -79,10 +79,14 @@ id = {letter}({letter}|{digit}|[_])*
 	"not"			{ return symbol("not", sym.NOT); }
 	"of"			{ return symbol("of", sym.OF); }
 	"or"			{ return symbol("or", sym.OR); }
-	"procedure"		{ return symbol("procedure", sym.PROCEDURE); }
 	"then"			{ return symbol("then", sym.THEN); }
 	"var"			{ return symbol("var", sym.VAR); }
 	"while"			{ return symbol("while", sym.WHILE); }
+	"repeat"		{ return symbol("repeat", sym.REPEAT); }
+	"until"			{ return symbol("until", sym.UNTIL); }
+	"for"			{ return symbol("for", sym.FOR); }
+	"to"			{ return symbol("to", sym.TO); }
+	"in"			{ return symbol("in", sym.IN); }
 	"("				{ return symbol("(", sym.LEFT_PAR); }
 	")"				{ return symbol(")", sym.RIGHT_PAR); }
 	"["				{ return symbol("[", sym.LEFT_BRACKET); }
@@ -115,7 +119,7 @@ id = {letter}({letter}|{digit}|[_])*
 	{integer}		{ return symbol("integerconst", sym.INT_CONST, yytext()); }
 
 	{id}			{ Symbol newsym = symbol("id", sym.ID, yytext());
-					  symtab.enter(yytext(), newsym);
+					  //symtab.enter(yytext(), newsym);
 					  return newsym;
 					}
 

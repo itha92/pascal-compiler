@@ -18,7 +18,7 @@ parser code {:
 					m.append(", column "+(s.right+1));
 			}
 		}
-		m.append(" : "+message);
+		m.append(" : " + message);
 		System.err.println(m);
 	}
 
@@ -43,8 +43,8 @@ parser code {:
 	:};
 
 	terminal  PROGRAM, BEGIN, END, AND, ARRAY, DIV, DO, ELSE,
-	IF, NOT, OF, OR, PROCEDURE, THEN, VAR, WHILE, QUOTE,
-	LEFT_PAR, RIGHT_PAR, LEFT_BRACKET, RIGHT_BRACKET,
+	IF, NOT, OF, OR, THEN, VAR, WHILE, REPEAT, UNTIL, FOR, TO,
+	LEFT_PAR, RIGHT_PAR, LEFT_BRACKET, RIGHT_BRACKET, IN,
 	SEMICOLON, COLON, COMMA, DOT, ASIGN, PLUS, MINUS,
 	DIVIDE, PRODUCT, XOR, MOD, EQUALS, NOT_EQUAL,
 	GREATER_THAN, LESS_THAN, GREATER_EQUALS, LESS_EQUAL,
@@ -52,11 +52,26 @@ parser code {:
 	BOOLEAN, INT_CONST, TRUE, FALSE, CHAR_CONS, RIGHT_KEY;
 	terminal String STRING_LITERAL;
 
-	non terminal pascalProgram, block, variableDeclarationPart, variableDeclarationList, variableDeclaration, identifierList, 
-	type, arrayType, indexRange, simpleType, statementPart, compoundStatement, statementList, statement, procedureIdentifier, constant, simpleStatement, assignmentStatement, 
-	procedureStatement, readStatement, inputVariableList, inputVariable, writeStatement, outputValueList, outputValue, structuredStatement, 
-	ifStatement, whileStatement, expression, simpleExpressionList, simpleExpression, term, factor, relationalOperator, sign, addingOperator,
-	multiplyingOperator, variable, indexedVariable, arrayVariable, entireVariable, variableIdentifier, empty;
+	non terminal PascalProgram pascalProgram;
+	non terminal Block block;
+	non terminal Object variableDeclarationPart;
+	non terminal VariableDeclarationList variableDeclarationList;
+	non terminal VariableDeclaration variableDeclaration;
+	non terminal IdentifierList identifierList;
+	non terminal Type type;
+	non terminal ArrayType arrayType;
+	non terminal IndexRange indexRange;
+	non terminal SimpleType simpleType;
+	non terminal StatementPart statementPart;
+	non terminal statements;
+	non terminal statement;
+	non terminal variable;
+	non terminal operational;
+	non terminal expression;
+	non terminal simpleExpression;
+	non terminal Term term;
+	non terminal factor;
+	non terminal termOps;
 
 	precedence left OR ;
 	precedence left AND ;
@@ -66,417 +81,341 @@ parser code {:
 	precedence nonassoc NOT ;
 	precedence left DOT, LEFT_BRACKET, RIGHT_BRACKET, LEFT_PAR, RIGHT_PAR ;
 	precedence right ELSE;
+	precedence left ID;
+
+
 	start with pascalProgram;
 
-	pascalProgram::= PROGRAM:pro ID:id SEMICOLON:sc block:block DOT:dt {:
-		PascalProgram r = new PascalProgram((String) pro, (String) id, block, (String) sc, (String) dt);
-		RESULT = r;
-		
-		:} 
-		;
+	// program id;
+	// [Block]
+	// .
 
-	block::= variableDeclarationPart:vdp statementPart:sp {:
-		Block r = new Block(vdp, sp);
-		RESULT = r;
-		
+	pascalProgram ::= PROGRAM ID:id SEMICOLON block:block DOT {:
+			PascalProgram r = new PascalProgram((String) id, block);
+			RESULT = r;
 		:}
-		;
+	;
 
-	variableDeclarationPart::= VAR:var variableDeclarationList:vdl {:
-		VariableDeclarationPart r = new VariableDeclarationPart((String)var, vdl);
-		RESULT = r;
+	// [variableDeclarationPart]
+	// [statementPart]
+
+	block::= variableDeclarationPart:vdl statements:sp {:
+			Block r = new Block((VariableDeclarationList) vdl, sp);
+			RESULT = r;
 		:}
-		|
-	empty:empty {:
+	;
+
+	// VAR
+	//	  [variableDeclarationList]
+
+	variableDeclarationPart::= VAR variableDeclarationList:vdl {:
+			RESULT = vdl;
 		:}
-		;
+	|
+		{:
+			VariableDeclarationList r = new VariableDeclarationList();
+			RESULT = r;
+		:}
+	;
+
+	//    [str, str2, str3 : string;]
+	//    [char, char2, char3: char;]
 
 	variableDeclarationList::= variableDeclaration:vd {:
-			VariableDeclaration r = new VariableDeclaration(vd);
+			VariableDeclarationList r = new VariableDeclarationList(vd);
 			RESULT = r;
-			:}
-			|
+		:}
+	|
 		variableDeclarationList:vdl variableDeclaration:vd{:
-			VariableDeclaration r = new VariableDeclaration(vdl, il, (String) c, t, (String)sc);
-			RESULT = r;
-			:}
-			;
+			vdl.add_declaration(vd);
+			RESULT = vdl;
+		:}
+	;
 
-	variableDeclaration::= identifierList:il COLON:c type:t SEMICOLON:sc {:
-			VariableDeclaration r = new VariableDeclaration( il, (String) c, t, (String)sc);
-			RESULT = r;
-		:};
+	// variableDeclaration
+	//    [num, num2, num3] : [integer];
+	//    [identifierList] : [type];
 
 
-	identifierList::= ID:id {:
-			IdentifierList r = new IdentifierList((String) id);
+	variableDeclaration::= identifierList:il COLON type:t SEMICOLON {:
+			VariableDeclaration r = new VariableDeclaration(il, t);
 			RESULT = r;
-			:}
-			|
-		identifierList:il COMMA:c ID:id {:
-			IdentifierList r = new IdentifierList((String) id, (String) c, il);
+		:}
+	;
+
+
+	// [identifierList] : string
+	// char, char2, char3
+
+	identifierList::= variable:v {:
+			IdentifierList r = new IdentifierList(v);
+			r.add_id(id);
 			RESULT = r;
-			:}
-			;
+		:}
+	|
+		identifierList:il COMMA ID:id {:
+			il.add_id(id);
+			RESULT = il;
+		:}
+	;
+
+
+	// Los tipos pueden ser:
+	//	str : string; (sympleType)
+	// o
+	//	myArray, myArray2 : Array[1..5] of Integer; (arrayType)
+
 	type::= simpleType:st {:
-		Type r = new Type(st);
-		RESULT = r;
-		:}
-		| 
-		arrayType:at {:
-		Type r = new Type(at);
-		RESULT = r;
-			:}
-		;
-
-	arrayType::= ARRAY:arr LEFT_BRACKET:lb indexRange:ir RIGHT_BRACKET:rb OF:of simpleType:st {:
-			ArrayType r = new ArrayType((String)arr, (String)lb, ir, (String)rb, (String)of, st);
+			Type r = new Type(st);
 			RESULT = r;
 		:}
-		;
+	|
+		arrayType:at {:
+			Type r = new Type(at);
+			RESULT = r;
+		:}
+	;
 
-	indexRange::= INTEGER:integer1 DOT:dt1 DOT:dt2 INTEGER:integer2 {:
-			IndexRange r = new IndexRange((String)integer1, (String)dt1, (String)dt2, (String)integer2);
+
+	// myArray : Array[1..5] of Integer;
+
+	arrayType::= ARRAY LEFT_BRACKET indexRange:ir RIGHT_BRACKET OF simpleType:st {:
+			ArrayType r = new ArrayType(ir.start, ir.end, st);
+			RESULT = r;
+		:}
+	;
+
+	// [1..5]
+
+	indexRange::= INTEGER:start DOT DOT INTEGER:end {:
+			IndexRange r = new IndexRange((Integer)start, (Integer)end);
 			RESULT = r;
 		:}
  	;
-	simpleType::= ID:id {:
-		SimpleType r = new SimpleType((String)id);
-		RESULT = r;
-		:}
-		;
 
-	statementPart::= compoundStatement:cs {:
-		StatementPart r = new StatementPart(cs);
-		RESULT = r;
-		:}
-		;
+ 	// string, char, integer, boolean
 
-	compoundStatement::= BEGIN:bg statementList:sl END:end{:
-		CompoundStatement r = new CompoundStatement((String)bg, sl, (String)end);
-		RESULT = r;
-		:}
-		;
-	statementList::= statement:stm {:
-			StatementList r = new StatementList(stm);
+	simpleType::= STRING {:
+			SimpleType r = new SimpleType("string");
 			RESULT = r;
-				:}
+		:}
 	|
-	statementList:sl SEMICOLON:sc statement:stm  {:
-			StatementList r = new StatementList(sl, (String)sc, stm);
+		CHAR:st {:
+			SimpleType r = new SimpleType("char");
 			RESULT = r;
-			:}
+		:}
+	|
+		INTEGER:st {:
+			SimpleType r = new SimpleType("integer");
+			RESULT = r;
+		:}
+	|
+		BOOLEAN:st {:
+			SimpleType r = new SimpleType("boolean");
+			RESULT = r;
+		:}
 	;
-	statement::= ID:ss {:
-			Statement r = new Statement(ss);
-			RESULT = r;
-		:}
-		|
-		structuredStatement:ss {:
-			Statement r = new Statement(ss);
-			RESULT = r;
-		:}
-		;
 
-	simpleStatement::= assignmentStatement:as {:
-			Statement r = new Statement(as);
-			RESULT = r;
-		:}
-		|
-	ID:ps {:
-			ProcedureStatement r = new ProcedureStatement(ps);
-			RESULT = r;
-		:}
-		|
-	readStatement:rs {:
-			ReadStatement r = new ReadStatement(rs);
-			RESULT = r;
-		:}
-		|
-	writeStatement:ws {:
-			WriteStatement r = new WriteStatement(ws);
-			RESULT = r;
-		:}
-		;
+	// para la repetición de statements
 
-	assignmentStatement::= variable:var {:
-		AssignmentStatement r = new AssignmentStatement(var);
-		RESULT r;
-		:}
-		|
-		expression:ex {:
-			AssignmentStatement r = new AssignmentStatement(ex);
-			RESULT r;
-		:}
-		;
-
-	procedureStatement::= ID:pi{:
-		ProcedureStatement r = new ProcedureStatement(pi);
-		RESULT r;
-		:}
-		;
-
-	readStatement::= READ_LN:rl LEFT_BRACKET:lb inputVariableList:iv RIGHT_PAR:rp {:
-		ReadStatement r = new ReadStatement((String)rl, (String)lb, iv, (String)rp);
-		RESULT = r;
-		:}
-		;
-
-	inputVariableList::= inputVariable:iv {:
-			InputVariableList r = new InputVariableList(iv);
-			RESULT = r;
-		:}
-		|
-		inputVariableList:ivl COMMA:c inputVariable:iv {:
-			InputVariableList r = new InputVariableList(ivl, (String)c, iv);
-			RESULT = r;
-		:}
-		;
-
-	inputVariable::= variable:v {:
-			InputVariable r = new InputVariable(v);
-			RESULT = r;
-		:}
-		;
-
-	writeStatement::= WRITE_LN:wl LEFT_BRACKET:lb outputValueList:ovl RIGHT_PAR:rp {:
-		WriteStatement r = new WriteStatement((String)wl, (String)lb, ovl, (String)rp);
-		RESULT = r;
-		:}
-		;
-
-	outputValueList::= outputValue:ov {:
+	statements::= statement {:
 
 		:}
-		|
-		outputValueList:ovl COMMA:c outputValue:ov{:
-			OutputValueList r = new OutputValueList(ovl, (String)c, ov);
-			RESULT = r;
-		:}
-		;
+	|
+		statements SEMICOLON statement {:
 
-	outputValue::= expression:ex {:
-			OutputValue r = new OutputValue(ex);
-			RESULT = r;
 		:}
-		;
+	;
 
-	structuredStatement::= compoundStatement:cs {:
-		StructuredStatement r = new StructuredStatement(cs);
-		RESULT = r;
-		:}
-		|
-		ifStatement:is {:
-			IfStatement r = new IfStatement(is);
-			RESULT = r;
-		:}
-		|
-		whileStatement:ws {:
-			WhileStatement r = new WhileStatement(ws);
-			RESULT = r;
-		:}
-		;
 
-	ifStatement::= IF:is expression:ex THEN:th statement:stm {:
-			IfStatement r = new IfStatement((String)is, ex,(String)th , stm);
+	// contiene:
+	// if e then s
+	// if e then s else s
+	// while e do s
+	// repeate e until s
+	// for id := e to e do s
+	// v := e
+	// begin ss end
+
+	statement::= IF expression:e THEN statement:s {:
+			IfStatement r = new IfStatement(e, s);
 			RESULT = r;
 		:}
-		|
-			IF:is expression:ex THEN:th statement:stm1 ELSE:el statement:stm2 {:
-				IfStatement r = new Statement((String)is, ex,(String)th , stm1, (String)el, stm2);
-				RESULT = r;
-		:}
-		;
-	whileStatement::= WHILE:wh expression:ex DO:d statement:stm {:
-			WhileStatement r = new WhileStatement((String)wh, ex, (String)d, stm);
+	|
+		IF expression:e THEN statement:s1 ELSE statement:s2 {:
+			IfStatement r = new IfStatement(e, s1, s2);
 			RESULT = r;
 		:}
-		;
+	|
+		WHILE expression:e DO statement:s {:
+			WhileStatement r = new WhileStatement(e, s);
+			RESULT = r;
+		:}
+	|
+		REPEAT statement:e UNTIL expression:e {:
+			RepeatStatement r = new RepeatStatement(e, s);
+			RESULT = r;
+		:}
+	|
+		FOR ID:id ASIGN expression:e1 TO expression:e2 DO statement:s {:
+			ForStatement r = new ForStatement(id, e1, e2, s);
+			RESULT = r;
+		:}
+	|
+		variable:v ASIGN expression:e {:
+			AssignmentStatement r = new AssignmentStatement(v, e);
+			RESULT = r;
+		:}
+	|
+		BEGIN statements:s END {:
+			BEStatement r = new BEStatement(s);
+			RESULT = r;
+		:}
+	;
+
+	// agarra el id de una variable normal o el de un arreglo
+	// id
+	// id[pos]
+	// pos puede ser una expresion tipo 4+3
+
+	variable::= ID:id LEFT_BRACKET expression:e RIGHT_BRACKET {:
+			Variable r = new Variable(id, e)
+			RESULT = r;
+		:}
+	|
+		ID:id {:
+			Variable r = new Variable(id);
+			RESULT = r;
+		:}
+	;
+
+
+
+	operational::= PRODUCT {:
+			Operational r = new Operational("*");
+			RESULT = r;
+		:}
+	|
+		DIVIDE {:
+			Operational r = new Operational("/");
+			RESULT = r;
+		:}
+	|
+		GREATER_THAN {:
+			Operational r = new Operational(">");
+			RESULT = r;
+		:}
+	|
+		LESS_THAN {:
+			Operational r = new Operational("<");
+			RESULT = r;
+		:}
+	|
+		GREATER_EQUALS {:
+			Operational r = new Operational(">=");
+			RESULT = r;
+		:}
+	|
+		LESS_EQUAL {:
+			Operational r = new Operational(">=");
+			RESULT = r;
+		:}
+	|
+		IN {:
+			Operational r = new Operational("IN");
+			RESULT = r;
+		:}
+	|
+		{:
+			RESULT = null;
+		:}
+	;
+
 
 	expression::= simpleExpression:se {:
 			Expression r = new Expression(se);
 			RESULT = r;
 		:}
-		|
-		simpleExpression:se1 relationalOperator:ro simpleExpression:se2{:
-			Expression r = new Expression(se1, ro, se2);
+	|
+		simpleExpression:se1 operational:o simpleExpression:se2 {:
+			Expression r = new Expression(se1, o, se2);
 			RESULT = r;
 		:}
-		;
+	;
 
-	simpleExpressionList::= simpleExpression:se {:
-			SimpleExpressionList r = new SimpleExpressionList(se);
-			RESULT = r;
-		:}
-		|
-		simpleExpressionList:sel simpleExpression:se {:
-			SimpleExpressionList r = new SimpleExpressionList(sel, se);
-			RESULT = r;
-		:}
-		;
 
-	simpleExpression::= sign:sn term:tm {:
-			SimpleExpression r = new SimpleExpression(sn, tm);
+	simpleExpression::= PLUS term:t {:
+			SimpleExpression r = new SimpleExpression("+", t);
 			RESULT = r;
 		:}
-		;
+	|
+		MINUS term:t {:
+			SimpleExpression r = new SimpleExpression("+", t);
+			RESULT = r;
+		:}
+	|
+		term:t {:
+			SimpleExpression r = new SimpleExpression(t);
+			RESULT = r;
+		:}
+	|
+		simpleExpression:se PLUS term:t {:
+			SimpleExpression r = new SimpleExpression(se, "+", t);
+			RESULT = t;
+		:}
+	|
+		simpleExpression:se MINUS term:t {:
+			SimpleExpression r = new SimpleExpression(se, "-", t);
+			RESULT = t;
+		:}
+	|
+		simpleExpression:se OR term:t {:
+			SimpleExpression r = new SimpleExpression(se, "OR", t);
+			RESULT = t;
+		:}
+	;
 
-	term::= factor:fc {:
-			Term r = new Term(fc);
+
+	term::= factor:f {:
+			Term r = new Term(f);
 			RESULT = r;
 		:}
-		|
-		term:tm multiplyingOperator:mo factor:fc{:
-			Term r = new Term(tm, mo, fc);
+	|
+		factor:f termOps:to term:t {:
+			Term r = new Term(f,to,t);
 			RESULT = r;
 		:}
-		;
-		
-	factor::= VAR:v {:
+	;
+
+	termOps::= PRODUCT {:
+			RESULT = "*";
+		:}
+	|
+		DIVIDE {:
+			RESULT = "/";
+		:}
+	|
+		DIV {:
+			RESULT = "div";
+		:}
+	|
+		MOD {:
+			RESULT = "mod";
+		:}
+	;
+
+	factor::= variable:v {:
 			Factor r = new Factor(v);
 			RESULT = r;
 		:}
-		|
-		constant:c {:
-			Factor r = new Factor(c);
-			RESULT = r;
-			:}
-		|
-		LEFT_PAR:lp expression:ex RIGHT_PAR:rp {:
-			Factor r = new Factor((String)lp, ex, (String)rp);
-			RESULT = r;
-			:}
-		;
-	constant::= INTEGER:it {:
-		Constant r = new Constant((String)it);
-		RESULT r;
-	:}
 	|
-	STRING_LITERAL:sl {:
-		Constant r = new Constant((String)sl);
-		RESULT r;
+		LEFT_PAR expression:e RIGHT_PAR {:
+			Factor r = new Factor(e);
+			RESULT = r;
 		:}
 	|
-	ID:id {:
-		Constant r = new Constant((String)id);
-		RESULT r;
+		NOT factor:f {:
+			Factor r = new Factor(f);
+			RESULT = r;
 		:}
-		;
-//VEREMOS
-	relationalOperator::= LESS_THAN:s  {:
-			RelationalOperator r = new RelationalOperator((String) s);
-			RESULT = r;
-			:}
-	|
-		LESS_EQUAL:s {:
-			RelationalOperator r = new RelationalOperator((String) s);
-			RESULT = r;
-			:}
-	|
-		EQUALS:s {:
-			RelationalOperator r = new RelationalOperator((String) s);
-			RESULT = r;
-			:}
-	|
-		NOT_EQUAL:s {:
-			RelationalOperator r = new RelationalOperator((String) s);
-			RESULT = r;
-			:}
-	|
-		GREATER_EQUALS:s {:
-			RelationalOperator r = new RelationalOperator((String) s);
-			RESULT = r;
-			:}
-	|
-		GREATER_THAN:s {:
-			RelationalOperator r = new RelationalOperator((String) s);
-			RESULT = r;
-			:}
 	;
-
-	sign::= PLUS:pl {:
-		Sign r = new Sign((String)pl);
-		RESULT = r;
-		:}
-		|
-		MINUS:mn {:
-			Sign r = new Sign((String)mn);
-			RESULT = r;
-		:}
-		|
-		empty:empty {:
-		:}
-		;
-	
-	addingOperator::= PLUS:pl {:
-			AddingOperator r = new AddingOperator((String)pl);
-			RESULT = r;
-		:}
-		|
-		MINUS:mn {:
-			AddingOperator r = new AddingOperator((String)mn);
-			RESULT = r;
-		:}
-		|
-		OR:or {:
-			AddingOperator r = new AddingOperator((String)or);
-			RESULT = r;
-		:}
-		;	
-
-	multiplyingOperator::= PRODUCT:pd {:
-			MultiplyingOperator r = new MultiplyingOperator((String)pd);
-			RESULT = r;
-		:}
-		|
-		DIVIDE:dd {:
-			MultiplyingOperator r = new MultiplyingOperator((String)dd);
-			RESULT = r;
-		:}
-		|
-		AND:an {:
-			MultiplyingOperator r = new MultiplyingOperator((String)an);
-			RESULT = r;
-		:}
-		;
-	variable::= ID:ev {:
-		Variable r = new Variable(ev);
-		RESULT = r;
-		:}
-		|
-		indexedVariable:iv {:
-		Variable r = new Variable(iv);
-		RESULT = r;
-		:}
-		;
-
-	indexedVariable::= arrayVariable:av LEFT_BRACKET:lb expression:ex RIGHT_BRACKET:rb {:
-			IndexedVariable r = new IndexedVariable(av, (String)lb, ex, (String)rb);
-			RESULT = r;
-		:}
-		;
-
-	arrayVariable::= entireVariable:ev {:
-		ArrayVariable r = new ArrayVariable(ev);
-		RESULT = r;
-		:}
-		;
-
-	entireVariable::= ID:vi {:
-		EntireVariable r = new EntireVariable(vi);
-		RESULT = r;
-		:}
-		;
-
-	variableIdentifier::= ID:id {:
-		VariableIdentifier r = new VariableIdentifier(id);
-		RESULT = r;
-	:}
-	;
-
-
-
-	empty::=
-	;
-	}
-	}

@@ -5,10 +5,25 @@
  */
 package mini.pascal.ast;
 
+import mini.pascal.compiler.SymTable;
+
 /**
  *
  * @author jorgecaballero
  */
-public class PascalProgram {
+public class PascalProgram implements AST {
+    public String id;
+    public Block block;
+
+    public PascalProgram(String id, Block block) {
+        this.id = id;
+        this.block = block;
+    }
+
+    public SymTable st;
     
+    public void setSymtabs() {          // calculate symbol table entries
+        st = new SymTable();            // set input variables
+        block.vdl.setSymTable(st);
+      }
 }
