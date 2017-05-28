@@ -3,12 +3,15 @@ package mini.pascal.compiler;
 import java_cup.runtime.*;
 import java.io.FileReader;
 import mini.pascal.ast.*;
+import java.util.ArrayList;
 
 parser code {:
 
 	public PascalProgram root = null;
 
 	public SymTable symtable = new SymTable();
+
+	public ArrayList<IntermReg> intermcode = new ArrayList<IntermReg>();
 
 	public void report_error(String message, Object info) {
 		StringBuilder m = new StringBuilder("Sintax Error");

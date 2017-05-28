@@ -31,7 +31,7 @@ public class MiniPascalCompiler {
         CupGenerator.main(args);
         Reader reader;
         try {
-            reader = new BufferedReader(new FileReader("./test/func.pas"));
+            reader = new BufferedReader(new FileReader("./test/forloop.pas"));
             Lexer lexer = new Lexer(reader);
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
