@@ -11,9 +11,9 @@ package mini.pascal.ast;
  */
 public class Block {
     public VariableDeclarationList vdl;
-    public StatementPart sp;
+    public Statements sp;
 
-    public Block(VariableDeclarationList vdl, StatementPart sp) {
+    public Block(VariableDeclarationList vdl, Statements sp) {
         this.vdl = vdl;
         this.sp = sp;
     }

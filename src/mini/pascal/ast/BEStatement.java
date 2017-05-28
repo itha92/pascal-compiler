@@ -9,16 +9,12 @@ package mini.pascal.ast;
  *
  * @author jorgecaballero
  */
-public class SimpleType {
-    public String type;
+public class BEStatement extends Statement {
+    public Statements statement;
 
-    public SimpleType(String type) {
-        this.type = type;
+    public BEStatement(Statements statement) {
+        this.statement = statement;
     }
-
-    @Override
-    public String toString(){
-    	return type;
-    }
-
+    
+    
 }

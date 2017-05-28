@@ -9,17 +9,17 @@ package mini.pascal.ast;
  *
  * @author jorgecaballero
  */
-public class Variable {
+public class ForStatement extends Statement {
     public String id;
     public Expression expression;
+    public Expression expression2;
+    public Statement statement;
 
-    public Variable(Object id) {
+    public ForStatement(Object id, Expression expression, Expression expression2, Statement statement) {
         this.id = (String) id;
-    }
-
-    public Variable(Object id, Expression expression) {
-        this.id =  (String) id;
         this.expression = expression;
+        this.expression2 = expression2;
+        this.statement = statement;
     }
     
     

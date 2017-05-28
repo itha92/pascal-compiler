@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -43,10 +44,10 @@ public class MiniPascalCompiler {
                 .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             //mapper.setVisibility(JsonMethod.FIELD, Visibility.ANY);
-            System.out.println(symtab);
+            //System.out.println(symtab);
             Parser cupParser = new Parser(lexer);
             cupParser.parse();
-            //mapper.writeValue(new File("./src/pascal/compiler/AST.json"), cupParser.root);
+            mapper.writeValue(new File("./src/mini/pascal/compiler/AST.json"), cupParser.root);
 
 
         } catch (FileNotFoundException ex) {

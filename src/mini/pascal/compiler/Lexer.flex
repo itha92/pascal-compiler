@@ -70,7 +70,6 @@ id = {letter}({letter}|{digit}|[_])*
 	"writeln"		{ return symbol("writeln", sym.WRITE_LN); }
 	"readln"		{ return symbol("writeln", sym.READ_LN); }
 	"end"			{ return symbol("end", sym.END); }
-	"and"			{ return symbol("and", sym.AND); }
 	"array"			{ return symbol("array", sym.ARRAY); }
 	"div"			{ return symbol("div", sym.DIV); }
 	"do"			{ return symbol("do", sym.DO); }
@@ -100,7 +99,6 @@ id = {letter}({letter}|{digit}|[_])*
 	"-"				{ return symbol("-", sym.MINUS); }
 	"/"				{ return symbol("/", sym.DIVIDE); }
 	"*"				{ return symbol("*", sym.PRODUCT); }
-	"^"				{ return symbol("^", sym.XOR); }
 	"mod"			{ return symbol("mod", sym.MOD); }
 	"="				{ return symbol("=", sym.EQUALS); }
 	"<>"			{ return symbol("<>", sym.NOT_EQUAL); }

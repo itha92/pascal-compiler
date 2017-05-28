@@ -19,6 +19,10 @@ public class ArrayType {
         this.end = end;
         this.type = type;
     }
-    
-    
+
+    @Override
+    public String toString(){
+    	return "array[" + start + ".." + end + "] of "+  type.type;
+    }
+
 }

@@ -29,6 +29,7 @@ public class SymTable {
     public boolean enter(String s, String e) {
         Object value = lookup(s);
         m.put(s, e);
+        this.toString();
         return(value==null);
     }
     

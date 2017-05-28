@@ -8,6 +8,8 @@ parser code {:
 
 	public PascalProgram root = null;
 
+	SymTable symtable = new SymTable();
+
 	public void report_error(String message, Object info) {
 		StringBuilder m = new StringBuilder("Sintax Error");
 		if (info instanceof java_cup.runtime.Symbol) {
@@ -42,14 +44,15 @@ parser code {:
 	}
 	:};
 
-	terminal  PROGRAM, BEGIN, END, AND, ARRAY, DIV, DO, ELSE,
+	terminal  PROGRAM, BEGIN, END, ARRAY, DIV, DO, ELSE,
 	IF, NOT, OF, OR, THEN, VAR, WHILE, REPEAT, UNTIL, FOR, TO,
 	LEFT_PAR, RIGHT_PAR, LEFT_BRACKET, RIGHT_BRACKET, IN,
 	SEMICOLON, COLON, COMMA, DOT, ASIGN, PLUS, MINUS,
-	DIVIDE, PRODUCT, XOR, MOD, EQUALS, NOT_EQUAL,
+	DIVIDE, PRODUCT, MOD, EQUALS, NOT_EQUAL,
 	GREATER_THAN, LESS_THAN, GREATER_EQUALS, LESS_EQUAL,
-	INTEGER, ID, STRING, CHAR, LEFT_KEY, WRITE_LN, READ_LN,
-	BOOLEAN, INT_CONST, TRUE, FALSE, CHAR_CONS, RIGHT_KEY;
+	INTEGER, ID, STRING, CHAR, WRITE_LN, READ_LN,
+	BOOLEAN, INT_CONST, TRUE, FALSE, CHAR_CONS;
+
 	terminal String STRING_LITERAL;
 
 	non terminal PascalProgram pascalProgram;
@@ -63,18 +66,17 @@ parser code {:
 	non terminal IndexRange indexRange;
 	non terminal SimpleType simpleType;
 	non terminal StatementPart statementPart;
-	non terminal statements;
-	non terminal statement;
-	non terminal variable;
-	non terminal operational;
-	non terminal expression;
-	non terminal simpleExpression;
+	non terminal Statements statements;
+	non terminal Statement statement;
+	non terminal Variable variable;
+	non terminal String operational;
+	non terminal Expression expression;
+	non terminal SimpleExpression simpleExpression;
 	non terminal Term term;
-	non terminal factor;
-	non terminal termOps;
+	non terminal Factor factor;
+	non terminal String termOps;
 
 	precedence left OR ;
-	precedence left AND ;
 	precedence nonassoc EQUALS, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_EQUAL, GREATER_EQUALS ;
 	precedence left PLUS, MINUS ;
 	precedence left PRODUCT, DIVIDE ;
@@ -93,6 +95,7 @@ parser code {:
 	pascalProgram ::= PROGRAM ID:id SEMICOLON block:block DOT {:
 			PascalProgram r = new PascalProgram((String) id, block);
 			RESULT = r;
+			parser.root = RESULT;
 		:}
 	;
 
@@ -100,7 +103,8 @@ parser code {:
 	// [statementPart]
 
 	block::= variableDeclarationPart:vdl statements:sp {:
-			Block r = new Block((VariableDeclarationList) vdl, sp);
+			VariableDeclarationList var_list = (VariableDeclarationList) vdl;
+			Block r = new Block(var_list, sp);
 			RESULT = r;
 		:}
 	;
@@ -139,7 +143,14 @@ parser code {:
 
 	variableDeclaration::= identifierList:il COLON type:t SEMICOLON {:
 			VariableDeclaration r = new VariableDeclaration(il, t);
+			for (int i = 0; i < il.ids.size(); i++) {
+				System.out.println(il.ids.get(i) + " will be a "+ t.getType().toString());
+			}
 			RESULT = r;
+		:}
+	|
+		error SEMICOLON {:
+			System.err.println("Error at declaration line: Posible missing ; at the end of a declaration line.");
 		:}
 	;
 
@@ -147,8 +158,8 @@ parser code {:
 	// [identifierList] : string
 	// char, char2, char3
 
-	identifierList::= variable:v {:
-			IdentifierList r = new IdentifierList(v);
+	identifierList::= ID:id {:
+			IdentifierList r = new IdentifierList();
 			r.add_id(id);
 			RESULT = r;
 		:}
@@ -156,6 +167,10 @@ parser code {:
 		identifierList:il COMMA ID:id {:
 			il.add_id(id);
 			RESULT = il;
+		:}
+	|
+		error {:
+			System.err.println("Error at declaration list: Posible missing , in the middle of a declaration list.");
 		:}
 	;
 
@@ -187,13 +202,13 @@ parser code {:
 
 	// [1..5]
 
-	indexRange::= INTEGER:start DOT DOT INTEGER:end {:
-			IndexRange r = new IndexRange((Integer)start, (Integer)end);
+	indexRange::= factor:start DOT DOT factor:end {:
+			IndexRange r = new IndexRange(start, end);
 			RESULT = r;
 		:}
  	;
 
- 	// string, char, integer, boolean
+ 	// words: 'string', 'char', 'integer', 'boolean'
 
 	simpleType::= STRING {:
 			SimpleType r = new SimpleType("string");
@@ -218,12 +233,14 @@ parser code {:
 
 	// para la repetición de statements
 
-	statements::= statement {:
-
+	statements::= statement:s {:
+			Statements r = new Statements(s);
+			RESULT = r;
 		:}
 	|
-		statements SEMICOLON statement {:
-
+		statements:ss SEMICOLON statement:s {:
+			Statements r = new Statements(s, ss);
+			RESULT = r;
 		:}
 	;
 
@@ -252,7 +269,7 @@ parser code {:
 			RESULT = r;
 		:}
 	|
-		REPEAT statement:e UNTIL expression:e {:
+		REPEAT statement:s UNTIL expression:e {:
 			RepeatStatement r = new RepeatStatement(e, s);
 			RESULT = r;
 		:}
@@ -279,7 +296,7 @@ parser code {:
 	// pos puede ser una expresion tipo 4+3
 
 	variable::= ID:id LEFT_BRACKET expression:e RIGHT_BRACKET {:
-			Variable r = new Variable(id, e)
+			Variable r = new Variable(id, e);
 			RESULT = r;
 		:}
 	|
@@ -292,38 +309,39 @@ parser code {:
 
 
 	operational::= PRODUCT {:
-			Operational r = new Operational("*");
-			RESULT = r;
+			RESULT = "*";
 		:}
 	|
 		DIVIDE {:
-			Operational r = new Operational("/");
-			RESULT = r;
+			RESULT = "/";
 		:}
 	|
 		GREATER_THAN {:
-			Operational r = new Operational(">");
-			RESULT = r;
+			RESULT = ">";
 		:}
 	|
 		LESS_THAN {:
-			Operational r = new Operational("<");
-			RESULT = r;
+			RESULT = "<";
 		:}
 	|
 		GREATER_EQUALS {:
-			Operational r = new Operational(">=");
-			RESULT = r;
+			RESULT = ">=";
 		:}
 	|
 		LESS_EQUAL {:
-			Operational r = new Operational(">=");
-			RESULT = r;
+			RESULT = ">=";
+		:}
+	|
+		EQUALS EQUALS {:
+			RESULT = "==";
+		:}
+	|
+		NOT_EQUAL {:
+			RESULT = "<>";
 		:}
 	|
 		IN {:
-			Operational r = new Operational("IN");
-			RESULT = r;
+			RESULT = "IN";
 		:}
 	|
 		{:
@@ -338,7 +356,7 @@ parser code {:
 		:}
 	|
 		simpleExpression:se1 operational:o simpleExpression:se2 {:
-			Expression r = new Expression(se1, o, se2);
+			Expression r = new Expression(se1, se2, o);
 			RESULT = r;
 		:}
 	;
@@ -361,17 +379,17 @@ parser code {:
 	|
 		simpleExpression:se PLUS term:t {:
 			SimpleExpression r = new SimpleExpression(se, "+", t);
-			RESULT = t;
+			RESULT = r;
 		:}
 	|
 		simpleExpression:se MINUS term:t {:
 			SimpleExpression r = new SimpleExpression(se, "-", t);
-			RESULT = t;
+			RESULT = r;
 		:}
 	|
 		simpleExpression:se OR term:t {:
 			SimpleExpression r = new SimpleExpression(se, "OR", t);
-			RESULT = t;
+			RESULT = r;
 		:}
 	;
 
@@ -385,6 +403,7 @@ parser code {:
 			Term r = new Term(f,to,t);
 			RESULT = r;
 		:}
+
 	;
 
 	termOps::= PRODUCT {:
@@ -416,6 +435,31 @@ parser code {:
 	|
 		NOT factor:f {:
 			Factor r = new Factor(f);
+			RESULT = r;
+		:}
+	|
+		INT_CONST:i {:
+			Factor r = new Factor((String) i, "integer");
+			RESULT = r;
+		:}
+	|
+		STRING_LITERAL:i {:
+			Factor r = new Factor((String) i, "string");
+			RESULT = r;
+		:}
+	|
+		CHAR_CONS:i {:
+			Factor r = new Factor((String) i, "char");
+			RESULT = r;
+		:}
+	|
+		TRUE:i {:
+			Factor r = new Factor((String) i, "boolean");
+			RESULT = r;
+		:}
+	|
+		FALSE:i {:
+			Factor r = new Factor((String) i, "boolean");
 			RESULT = r;
 		:}
 	;

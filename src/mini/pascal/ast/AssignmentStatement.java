@@ -9,16 +9,12 @@ package mini.pascal.ast;
  *
  * @author jorgecaballero
  */
-public class Variable {
-    public String id;
+public class AssignmentStatement extends Statement{
+    public Variable variable;
     public Expression expression;
 
-    public Variable(Object id) {
-        this.id = (String) id;
-    }
-
-    public Variable(Object id, Expression expression) {
-        this.id =  (String) id;
+    public AssignmentStatement(Variable variable, Expression expression) {
+        this.variable = variable;
         this.expression = expression;
     }
     

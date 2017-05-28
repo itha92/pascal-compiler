@@ -24,6 +24,6 @@ public class PascalProgram implements AST {
     
     public void setSymtabs() {          // calculate symbol table entries
         st = new SymTable();            // set input variables
-        block.vdl.setSymTable(st);
+        //block.vdl.setSymTable(st);
       }
 }

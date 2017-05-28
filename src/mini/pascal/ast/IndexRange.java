@@ -13,10 +13,15 @@ public class IndexRange {
     public int start;
     public int end;
 
-    public IndexRange(int start, int end) {
-        this.start = start;
-        this.end = end;
+    public IndexRange(Factor start, Factor end) {
+    	if (start.type == "integer"){
+    		if (end.type == "integer"){
+    			this.start = Integer.parseInt(start.constant);
+        		this.end = Integer.parseInt(end.constant);
+    		}
+    	}
+
     }
-    
-    
+
+
 }

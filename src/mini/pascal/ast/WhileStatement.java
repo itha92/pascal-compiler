@@ -9,18 +9,14 @@ package mini.pascal.ast;
  *
  * @author jorgecaballero
  */
-public class Variable {
-    public String id;
+public class WhileStatement extends Statement{
     public Expression expression;
+    public Statement statement;
 
-    public Variable(Object id) {
-        this.id = (String) id;
-    }
-
-    public Variable(Object id, Expression expression) {
-        this.id =  (String) id;
+    public WhileStatement(Expression expression, Statement statement) {
         this.expression = expression;
+        this.statement = statement;
+        super.type = "while";
     }
-    
     
 }
