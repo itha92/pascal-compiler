@@ -5,8 +5,6 @@
  */
 package mini.pascal.ast;
 
-import mini.pascal.compiler.SymTable;
-
 /**
  *
  * @author jorgecaballero

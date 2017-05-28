@@ -27,12 +27,6 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 	int commentLine;
 	StringBuffer string = new StringBuffer();
 
-	SymTable symtab;          // externe symbol table
-
-	public void setSymtab(SymTable symtab) {
-		this.symtab = symtab;
-	}
-
 	private Symbol symbol(String name, int sym) {
 		//System.out.println("name: " + name + " sym: " + sym);
 		return new Symbol(sym, yyline, yycolumn);

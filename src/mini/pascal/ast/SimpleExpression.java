@@ -13,10 +13,12 @@ public class SimpleExpression {
     public Term term;
     public SimpleExpression simpleExpression;
     public String sign;
+    public String type;
 
     public SimpleExpression(String sign, Term term) {
         this.term = term;
         this.sign = sign;
+        this.type = term.type;
     }
 
     public SimpleExpression(SimpleExpression simpleExpression, String sign, Term term) {
@@ -27,8 +29,9 @@ public class SimpleExpression {
 
     public SimpleExpression(Term term) {
         this.term = term;
+        this.type = term.type;
     }
-    
-    
-    
+
+
+
 }

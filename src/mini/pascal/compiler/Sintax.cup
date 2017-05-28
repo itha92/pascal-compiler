@@ -8,7 +8,7 @@ parser code {:
 
 	public PascalProgram root = null;
 
-	SymTable symtable = new SymTable();
+	public SymTable symtable = new SymTable();
 
 	public void report_error(String message, Object info) {
 		StringBuilder m = new StringBuilder("Sintax Error");
@@ -65,7 +65,6 @@ parser code {:
 	non terminal ArrayType arrayType;
 	non terminal IndexRange indexRange;
 	non terminal SimpleType simpleType;
-	non terminal StatementPart statementPart;
 	non terminal Statements statements;
 	non terminal Statement statement;
 	non terminal Variable variable;
@@ -96,6 +95,7 @@ parser code {:
 			PascalProgram r = new PascalProgram((String) id, block);
 			RESULT = r;
 			parser.root = RESULT;
+			System.out.println(parser.symtable.toString());
 		:}
 	;
 
@@ -144,7 +144,7 @@ parser code {:
 	variableDeclaration::= identifierList:il COLON type:t SEMICOLON {:
 			VariableDeclaration r = new VariableDeclaration(il, t);
 			for (int i = 0; i < il.ids.size(); i++) {
-				System.out.println(il.ids.get(i) + " will be a "+ t.getType().toString());
+				parser.symtable.enter(il.ids.get(i), t.getType().toString());
 			}
 			RESULT = r;
 		:}
@@ -281,6 +281,17 @@ parser code {:
 	|
 		variable:v ASIGN expression:e {:
 			AssignmentStatement r = new AssignmentStatement(v, e);
+			if (v.type != e.type) {
+				StringBuilder m = new StringBuilder("Error: Operating differents types. ("+v.type+"=/="+ e.type+")");
+				if (vleft >= 0) {
+					m.append(" at line "+(vleft+1));
+				if (vright >= 0)
+					m.append(", column "+(vright+1));
+				}
+				System.err.println(m);
+			} else {
+				r.type = v.type;
+			}
 			RESULT = r;
 		:}
 	|
@@ -297,11 +308,33 @@ parser code {:
 
 	variable::= ID:id LEFT_BRACKET expression:e RIGHT_BRACKET {:
 			Variable r = new Variable(id, e);
+			String var_type = parser.symtable.lookup((String) id);
+			if (var_type == null) {
+				StringBuilder m = new StringBuilder("Error: Variable '"+ (String) id +"' was not defined.");
+				if (idleft >= 0) {
+					m.append(" at line "+(idleft+1));
+				if (idright >= 0)
+					m.append(", column "+(idright+1));
+				}
+				System.err.println(m);
+			}
+			r.type = var_type;
 			RESULT = r;
 		:}
 	|
 		ID:id {:
 			Variable r = new Variable(id);
+			String var_type = parser.symtable.lookup((String) id);
+			if (var_type == null) {
+				StringBuilder m = new StringBuilder("Error: Variable '"+ (String) id +"' was not defined.");
+				if (idleft >= 0) {
+					m.append(" at line "+(idleft+1));
+				if (idright >= 0)
+					m.append(", column "+(idright+1));
+				}
+				System.err.println(m);
+			}
+			r.type = var_type;
 			RESULT = r;
 		:}
 	;
@@ -357,6 +390,15 @@ parser code {:
 	|
 		simpleExpression:se1 operational:o simpleExpression:se2 {:
 			Expression r = new Expression(se1, se2, o);
+			if (se1.type != se2.type) {
+				StringBuilder m = new StringBuilder("Error: Operating differents types. ("+se1.type+"=/="+ se2.type+")");
+				if (se1left >= 0) {
+					m.append(" at line "+(se1left+1));
+				if (se1right >= 0)
+					m.append(", column "+(se1right+1));
+				}
+				System.err.println(m);
+			}
 			RESULT = r;
 		:}
 	;
@@ -379,16 +421,49 @@ parser code {:
 	|
 		simpleExpression:se PLUS term:t {:
 			SimpleExpression r = new SimpleExpression(se, "+", t);
+			if (se.type == t.type) {
+				r.type = se.type;
+			} else {
+				StringBuilder m = new StringBuilder("Error: Operating differents types. ("+se.type+"=/="+ t.type+")");
+				if (seleft >= 0) {
+					m.append(" at line "+(seleft+1));
+				if (seright >= 0)
+					m.append(", column "+(seright+1));
+				}
+				System.err.println(m);
+			}
 			RESULT = r;
 		:}
 	|
 		simpleExpression:se MINUS term:t {:
 			SimpleExpression r = new SimpleExpression(se, "-", t);
+			if (se.type == t.type) {
+				r.type = se.type;
+			} else {
+				StringBuilder m = new StringBuilder("Error: Operating differents types. ("+se.type+"=/="+ t.type+")");
+				if (seleft >= 0) {
+					m.append(" at line "+(seleft+1));
+				if (seright >= 0)
+					m.append(", column "+(seright+1));
+				}
+				System.err.println(m);
+			}
 			RESULT = r;
 		:}
 	|
 		simpleExpression:se OR term:t {:
 			SimpleExpression r = new SimpleExpression(se, "OR", t);
+			if (se.type == t.type) {
+				r.type = se.type;
+			} else {
+				StringBuilder m = new StringBuilder("Error: Operating differents types. ("+se.type+"=/="+ t.type+")");
+				if (seleft >= 0) {
+					m.append(" at line "+(seleft+1));
+				if (seright >= 0)
+					m.append(", column "+(seright+1));
+				}
+				System.err.println(m);
+			}
 			RESULT = r;
 		:}
 	;
@@ -396,11 +471,23 @@ parser code {:
 
 	term::= factor:f {:
 			Term r = new Term(f);
+			r.type = f.type;
 			RESULT = r;
 		:}
 	|
 		factor:f termOps:to term:t {:
 			Term r = new Term(f,to,t);
+			if (t.type == f.type) {
+				r.type = t.type;
+			} else {
+				StringBuilder m = new StringBuilder("Error: Operating differents types. ("+t.type+"=/="+ f.type+")");
+				if (fleft >= 0) {
+					m.append(" at line "+(fleft+1));
+				if (fright >= 0)
+					m.append(", column "+(fright+1));
+				}
+				System.err.println(m);
+			}
 			RESULT = r;
 		:}
 

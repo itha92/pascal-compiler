@@ -30,11 +30,9 @@ public class MiniPascalCompiler {
         LexerGenerator.main(args);
         CupGenerator.main(args);
         Reader reader;
-        SymTable symtab = new SymTable();
         try {
             reader = new BufferedReader(new FileReader("./test/func.pas"));
             Lexer lexer = new Lexer(reader);
-            lexer.setSymtab(symtab);
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
             mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()

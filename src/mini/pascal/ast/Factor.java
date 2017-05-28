@@ -18,23 +18,23 @@ public class Factor {
 
     public Factor(Factor factor) {
         this.factor = factor;
-        this.type = "factor";
+        this.type = factor.type;
     }
 
     public Factor(Variable variable) {
         this.variable = variable;
-        this.type = "variable";
+        this.type = variable.type;
     }
 
     public Factor(Expression expression) {
         this.expression = expression;
-        this.type = "expression";
+        this.type = expression.type;
     }
 
     public Factor(String constant, String type) {
         this.constant = constant;
         this.type = type;
     }
-    
-    
+
+
 }

@@ -13,6 +13,7 @@ public class Term {
     public Factor factor;
     public String termOps;
     public Term term;
+    public String type;
 
     public Term(Factor factor) {
         this.factor = factor;
@@ -23,6 +24,6 @@ public class Term {
         this.termOps = termOps;
         this.term = term;
     }
-    
-    
+
+
 }

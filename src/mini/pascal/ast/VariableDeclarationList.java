@@ -6,7 +6,6 @@
 package mini.pascal.ast;
 
 import java.util.ArrayList;
-import mini.pascal.compiler.SymTable;
 
 /**
  *

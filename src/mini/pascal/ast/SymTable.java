@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mini.pascal.compiler;
+package mini.pascal.ast;
 
 import java_cup.runtime.Symbol;
 import java.util.HashMap;
@@ -16,30 +16,30 @@ import java.util.Map;
 public class SymTable {
     Map<String, String> m;
     SymTable padre;
-
+    
     public SymTable(){
-       this(null);
+       this(null); 
     }
-
+    
     public SymTable(SymTable p) {
         m = new HashMap<String,String>();
         padre = p;
     }
-
+    
     public boolean enter(String s, String e) {
         Object value = lookup(s);
         m.put(s, e);
         this.toString();
         return(value==null);
     }
-
+    
     public String lookup(String s) {
         String value = m.get(s);
         if (value==null && padre!=null)
             value = padre.lookup(s);
         return value;
     }
-
+    
     @Override
     public String toString() {    // for output with print
         StringBuilder res = new StringBuilder("symbol table\n=============\n");
@@ -55,7 +55,7 @@ public class SymTable {
       }
 
       public int size() {
-        return(m.size());
+        return(m.size()); 
       }
-
+    
 }

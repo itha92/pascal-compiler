@@ -12,6 +12,7 @@ package mini.pascal.ast;
 public class Variable {
     public String id;
     public Expression expression;
+    public String type;
 
     public Variable(Object id) {
         this.id = (String) id;
@@ -21,6 +22,6 @@ public class Variable {
         this.id =  (String) id;
         this.expression = expression;
     }
-    
-    
+
+
 }

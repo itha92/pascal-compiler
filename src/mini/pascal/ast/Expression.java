@@ -14,24 +14,19 @@ public class Expression {
     public SimpleExpression simpleExpression2;
     public String operational;
     public String constant;
+    public String type;
 
     public Expression(SimpleExpression simpleExpression) {
         this.simpleExpression = simpleExpression;
+        this.type = simpleExpression.type;
     }
 
     public Expression(SimpleExpression simpleExpression, SimpleExpression simpleExpression2, String operational) {
         this.simpleExpression = simpleExpression;
         this.simpleExpression2 = simpleExpression2;
         this.operational = operational;
+        this.type = "boolean";
     }
 
-    public Expression(String constant) {
-        System.out.print(constant);
-        this.constant = constant;
-    }
-    
-    
-    
-    
-    
+
 }
