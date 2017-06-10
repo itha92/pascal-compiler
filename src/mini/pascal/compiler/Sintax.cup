@@ -29,7 +29,7 @@ parser code {:
 
 	public void report_fatal_error(String message, Object info) {
 		report_error(message, info);
-		System.exit(1);
+		//System.exit(1);
 	}
 
 	public void syntax_error(Symbol cur_token) {
@@ -539,7 +539,7 @@ parser code {:
 		:}
 	|
 		CHAR_CONS:i {:
-			Factor r = new Factor((String) i, "char");
+			Factor r = new Factor((String) i.toString(), "char");
 			RESULT = r;
 		:}
 	|

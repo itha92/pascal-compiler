@@ -47,17 +47,19 @@ digit = [0-9]
 
 boolean = "true"|"false"
 integer = {digit}+
+single_char = [^\r\n\'\\]
+line_term = \r|\n|\r\n
 
 id = {letter}({letter}|{digit}|[_])*
 
-%state COMMENT
-%state STRING
+%state COMMENT, CHARLITERAL, STRING
 
 %%
 
 <YYINITIAL> {
 	[ \n\t]+		{ }
 	\"				{ string.setLength(0); string.append( yytext() ); yybegin(STRING); }
+	\'              { yybegin(CHARLITERAL); }
 	"{"				{ commentLine = yyline+1; stComment++; yybegin(COMMENT); }
 	"program"		{ return symbol("program", sym.PROGRAM); }
 	"begin"			{ return symbol("begin", sym.BEGIN); }
@@ -107,7 +109,6 @@ id = {letter}({letter}|{digit}|[_])*
 	"integer"		{ return symbol("integer", sym.INTEGER); }
 	"string"		{ return symbol("string", sym.STRING); }
 
-	{letter}		{ return symbol("charconst", sym.CHAR_CONS, yytext()); }
 	{integer}		{ return symbol("integerconst", sym.INT_CONST, yytext()); }
 
 	{id}			{ Symbol newsym = symbol("id", sym.ID, yytext());
@@ -129,6 +130,25 @@ id = {letter}({letter}|{digit}|[_])*
       \\\"                           { string.append('\"'); }
       \\                             { string.append('\\'); }
  }
+
+
+<CHARLITERAL> {
+  {single_char}\'            { yybegin(YYINITIAL); return symbol("char literal", sym.CHAR_CONS, yytext().charAt(0)); }
+
+  /* escape sequences */
+  "\\b"\'                        { yybegin(YYINITIAL); return symbol("char literal", sym.CHAR_CONS, '\b');}
+  "\\t"\'                        { yybegin(YYINITIAL); return symbol("char literal", sym.CHAR_CONS, '\t');}
+  "\\n"\'                        { yybegin(YYINITIAL); return symbol("char literal", sym.CHAR_CONS, '\n');}
+  "\\f"\'                        { yybegin(YYINITIAL); return symbol("char literal", sym.CHAR_CONS, '\f');}
+  "\\r"\'                        { yybegin(YYINITIAL); return symbol("char literal", sym.CHAR_CONS, '\r');}
+  "\\\""\'                       { yybegin(YYINITIAL); return symbol("char literal", sym.CHAR_CONS, '\"');}
+  "\\'"\'                        { yybegin(YYINITIAL); return symbol("char literal", sym.CHAR_CONS, '\'');}
+  "\\\\"\'                       { yybegin(YYINITIAL); return symbol("char literal", sym.CHAR_CONS, '\\');}
+
+
+  /* error cases */
+  {line_term}               { throw new RuntimeException("Unterminated character literal at end of line"); }
+}
 
 <COMMENT> {
 	"{"		{ stComment++; }

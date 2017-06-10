@@ -42,10 +42,10 @@ public class SymTable {
 
     @Override
     public String toString() {    // for output with print
-        StringBuilder res = new StringBuilder("symbol table\n=============\n");
+        StringBuilder res = new StringBuilder("Tabla de Simbolos\n=============\n");
 
         m.entrySet().forEach((entry) -> {
-            res.append(entry.getKey()).append("   \t").append(entry.getValue()).append("\n");
+            res.append(entry.getKey()).append("\t\t").append(entry.getValue()).append("\n");
         });
 
         if (padre != null)
