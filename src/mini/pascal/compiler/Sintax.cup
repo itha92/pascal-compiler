@@ -54,7 +54,7 @@ parser code {:
 	DIVIDE, PRODUCT, MOD, EQUALS, NOT_EQUAL,
 	GREATER_THAN, LESS_THAN, GREATER_EQUALS, LESS_EQUAL,
 	INTEGER, ID, STRING, CHAR, WRITE_LN, READ_LN,
-	BOOLEAN, INT_CONST, TRUE, FALSE, CHAR_CONS;
+	BOOLEAN, INT_CONST, TRUE, FALSE, CHAR_CONS, PROCEDURE, FUNCTION;
 
 	terminal String STRING_LITERAL;
 
@@ -77,6 +77,13 @@ parser code {:
 	non terminal Term term;
 	non terminal Factor factor;
 	non terminal String termOps;
+	non terminal Blocks blocks;
+	non terminal FunctionDeclaration functionDeclaration;
+	non terminal ProcedureDeclaration procedureDeclaration;
+	non terminal Params params;
+	non terminal Param param;
+	non terminal Expressions expressions;
+
 
 	precedence left OR ;
 	precedence nonassoc EQUALS, NOT_EQUAL, LESS_THAN, GREATER_THAN, LESS_EQUAL, GREATER_EQUALS ;
@@ -94,8 +101,8 @@ parser code {:
 	// [Block]
 	// .
 
-	pascalProgram ::= PROGRAM ID:id SEMICOLON block:block DOT {:
-			PascalProgram r = new PascalProgram((String) id, block);
+	pascalProgram ::= PROGRAM ID:id SEMICOLON blocks:blocks DOT {:
+			PascalProgram r = new PascalProgram((String) id, blocks);
 			RESULT = r;
 			parser.root = RESULT;
 			System.out.println(parser.symtable.toString());
@@ -105,12 +112,62 @@ parser code {:
 	// [variableDeclarationPart]
 	// [statementPart]
 
-	block::= variableDeclarationPart:vdl statements:sp {:
-			VariableDeclarationList var_list = (VariableDeclarationList) vdl;
-			Block r = new Block(var_list, sp);
-			RESULT = r;
+	blocks::= block blocks {:
+
+		:}
+	|
+		block {:
+
 		:}
 	;
+
+	block::= variableDeclarationPart:vdl {:
+			VariableDeclarationList var_list = (VariableDeclarationList) vdl;
+			Block r = new Block(var_list);
+			RESULT = r;
+		:}
+	|
+		functionDeclaration SEMICOLON{:
+
+		:}
+	|
+		procedureDeclaration SEMICOLON{:
+
+		:}
+	|
+		BEGIN statements END {:
+
+		:}
+	;
+
+	functionDeclaration::= FUNCTION ID LEFT_PAR params RIGHT_PAR COLON type SEMICOLON blocks {:
+
+		:}
+	;
+
+	procedureDeclaration::= PROCEDURE ID LEFT_PAR params RIGHT_PAR SEMICOLON blocks {:
+
+		:}
+	;
+
+	params::= params SEMICOLON param{:
+
+		:}
+	|
+		param {:
+
+		:}
+	;
+
+	param::= identifierList COLON type {:
+
+		:}
+	|
+		VAR identifierList COLON type {:
+
+		:}
+	;
+
 
 	// VAR
 	//	  [variableDeclarationList]
@@ -118,22 +175,17 @@ parser code {:
 	variableDeclarationPart::= VAR variableDeclarationList:vdl {:
 			RESULT = vdl;
 		:}
-	|
-		{:
-			VariableDeclarationList r = new VariableDeclarationList();
-			RESULT = r;
-		:}
 	;
 
 	//    [str, str2, str3 : string;]
 	//    [char, char2, char3: char;]
 
-	variableDeclarationList::= variableDeclaration:vd {:
+	variableDeclarationList::= variableDeclaration:vd SEMICOLON{:
 			VariableDeclarationList r = new VariableDeclarationList(vd);
 			RESULT = r;
 		:}
 	|
-		variableDeclarationList:vdl variableDeclaration:vd{:
+		variableDeclarationList:vdl variableDeclaration:vd SEMICOLON{:
 			vdl.add_declaration(vd);
 			RESULT = vdl;
 		:}
@@ -144,7 +196,7 @@ parser code {:
 	//    [identifierList] : [type];
 
 
-	variableDeclaration::= identifierList:il COLON type:t SEMICOLON {:
+	variableDeclaration::= identifierList:il COLON type:t {:
 			VariableDeclaration r = new VariableDeclaration(il, t);
 			for (int i = 0; i < il.ids.size(); i++) {
 				parser.symtable.enter(il.ids.get(i), t.getType().toString());
@@ -302,6 +354,11 @@ parser code {:
 			BEStatement r = new BEStatement(s);
 			RESULT = r;
 		:}
+	|
+		// Llamado a procedimiento
+		ID LEFT_PAR expressions RIGHT_PAR {:
+
+		:}
 	;
 
 	// agarra el id de una variable normal o el de un arreglo
@@ -309,7 +366,7 @@ parser code {:
 	// id[pos]
 	// pos puede ser una expresion tipo 4+3
 
-	variable::= ID:id LEFT_BRACKET expression:e RIGHT_BRACKET {:
+	variable::= ID:id LEFT_BRACKET expressions:e RIGHT_BRACKET {:
 			Variable r = new Variable(id, e);
 			String var_type = parser.symtable.lookup((String) id);
 			if (var_type == null) {
@@ -385,6 +442,15 @@ parser code {:
 		:}
 	;
 
+
+	expressions::= expressions COMMA expression {:
+
+		:}
+	|
+		expression {:
+
+		:}
+	;
 
 	expression::= simpleExpression:se {:
 			Expression r = new Expression(se);
@@ -513,10 +579,17 @@ parser code {:
 		:}
 	;
 
-	factor::= variable:v {:
+	factor::= //Llamado a funcion
+		variable:v LEFT_PAR expressions:e RIGHT_PAR {:
+			Factor r = new Factor(v, e);
+			RESULT = r;
+		:}
+	|
+		variable:v {:
 			Factor r = new Factor(v);
 			RESULT = r;
 		:}
+
 	|
 		LEFT_PAR expression:e RIGHT_PAR {:
 			Factor r = new Factor(e);
@@ -552,4 +625,5 @@ parser code {:
 			Factor r = new Factor((String) i, "boolean");
 			RESULT = r;
 		:}
+
 	;

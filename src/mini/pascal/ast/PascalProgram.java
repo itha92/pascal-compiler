@@ -11,11 +11,11 @@ package mini.pascal.ast;
  */
 public class PascalProgram implements AST {
     public String id;
-    public Block block;
+    public Blocks blocks;
 
-    public PascalProgram(String id, Block block) {
+    public PascalProgram(String id, Blocks blocks) {
         this.id = id;
-        this.block = block;
+        this.blocks = blocks;
     }
 
     public SymTable st;

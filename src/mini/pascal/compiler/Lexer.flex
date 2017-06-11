@@ -108,6 +108,8 @@ id = {letter}({letter}|{digit}|[_])*
 	"char"			{ return symbol("char", sym.CHAR); }
 	"integer"		{ return symbol("integer", sym.INTEGER); }
 	"string"		{ return symbol("string", sym.STRING); }
+	"function"		{ return symbol("function", sym.FUNCTION); }
+	"procedure"		{ return symbol("procedure", sym.PROCEDURE); }
 
 	{integer}		{ return symbol("integerconst", sym.INT_CONST, yytext()); }
 

@@ -9,14 +9,6 @@ package mini.pascal.ast;
  *
  * @author jorgecaballero
  */
-public class Block {
-    public VariableDeclarationList vdl;
-    public Statements sp;
-
-    public Block(VariableDeclarationList vdl) {
-        this.vdl = vdl;
-        this.sp = sp;
-    }
-    
+public class Params {
     
 }

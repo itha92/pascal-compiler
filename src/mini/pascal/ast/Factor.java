@@ -13,6 +13,7 @@ public class Factor {
     public Factor factor;
     public Variable variable;
     public Expression expression;
+    public Expressions expressions;
     public String constant;
     public String type;
 
@@ -34,6 +35,11 @@ public class Factor {
     public Factor(String constant, String type) {
         this.constant = constant;
         this.type = type;
+    }
+
+    public Factor(Variable variable, Expressions expressions) {
+        this.variable = variable;
+        this.expressions = expressions;
     }
 
 
