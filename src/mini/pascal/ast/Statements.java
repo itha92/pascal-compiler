@@ -9,7 +9,7 @@ package mini.pascal.ast;
  *
  * @author jorgecaballero
  */
-public class Statements {
+public class Statements extends Block {
     public Statement statement;
     public Statements statements;
 

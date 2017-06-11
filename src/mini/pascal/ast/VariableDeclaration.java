@@ -9,7 +9,7 @@ package mini.pascal.ast;
  *
  * @author jorgecaballero
  */
-public class VariableDeclaration {
+public class VariableDeclaration{
     public IdentifierList ids;
     public Type type;
 

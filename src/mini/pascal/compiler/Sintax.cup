@@ -112,58 +112,60 @@ parser code {:
 	// [variableDeclarationPart]
 	// [statementPart]
 
-	blocks::= block blocks {:
-
+	blocks::= block:b blocks:bs {:
+			Blocks r = new Blocks(bs, b);
+			RESULT = r;
 		:}
 	|
-		block {:
-
+		block:b {:
+			Blocks r = new Blocks(b);
+			RESULT = r;
 		:}
 	;
 
 	block::= variableDeclarationPart:vdl {:
-			VariableDeclarationList var_list = (VariableDeclarationList) vdl;
-			Block r = new Block(var_list);
+			RESULT = (VariableDeclarationList) vdl;
+		:}
+	|
+		functionDeclaration:fd SEMICOLON {:
+			RESULT = (FunctionDeclaration) fd;
+		:}
+	|
+		procedureDeclaration:pd SEMICOLON {:
+			RESULT = (ProcedureDeclaration) pd;
+		:}
+	|
+		BEGIN statements:s END {:
+			RESULT = (Statements) s;
+		:}
+	;
+
+	functionDeclaration::= FUNCTION ID:id LEFT_PAR params:p RIGHT_PAR COLON type:t SEMICOLON blocks:b {:
+			FunctionDeclaration r = new FunctionDeclaration((String) id, p, t, b);
 			RESULT = r;
 		:}
-	|
-		functionDeclaration SEMICOLON{:
+	;
+
+	procedureDeclaration::= PROCEDURE ID:id LEFT_PAR params:p RIGHT_PAR SEMICOLON blocks:b {:
+			ProcedureDeclaration r = new ProcedureDeclaration((String) id, p, b);
+			RESULT = r;
+		:}
+	;
+
+	params::= params:ps SEMICOLON param:p{:
 
 		:}
 	|
-		procedureDeclaration SEMICOLON{:
-
-		:}
-	|
-		BEGIN statements END {:
+		param:p {:
 
 		:}
 	;
 
-	functionDeclaration::= FUNCTION ID LEFT_PAR params RIGHT_PAR COLON type SEMICOLON blocks {:
-
-		:}
-	;
-
-	procedureDeclaration::= PROCEDURE ID LEFT_PAR params RIGHT_PAR SEMICOLON blocks {:
-
-		:}
-	;
-
-	params::= params SEMICOLON param{:
+	param::= identifierList:i COLON type:t {:
 
 		:}
 	|
-		param {:
-
-		:}
-	;
-
-	param::= identifierList COLON type {:
-
-		:}
-	|
-		VAR identifierList COLON type {:
+		VAR identifierList:i COLON type:t {:
 
 		:}
 	;

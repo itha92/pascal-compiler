@@ -9,6 +9,17 @@ package mini.pascal.ast;
  *
  * @author jorgecaballero
  */
-public class FunctionDeclaration {
-    
+public class FunctionDeclaration extends Block {
+    String id;
+    Params params;
+    Type type;
+    Blocks blocks;
+
+    public FunctionDeclaration(String id, Params params, Type type, Blocks blocks) {
+        this.id = id;
+        this.params = params;
+        this.type = type;
+        this.blocks = blocks;
+    }
+   
 }

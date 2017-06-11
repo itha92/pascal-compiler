@@ -9,6 +9,16 @@ package mini.pascal.ast;
  *
  * @author jorgecaballero
  */
-public class ProcedureDeclaration {
+public class ProcedureDeclaration extends Block {
+    String id;
+    Params params;
+    Blocks blocks;
+
+    public ProcedureDeclaration(String id, Params params, Blocks blocks) {
+        this.id = id;
+        this.params = params;
+        this.blocks = blocks;
+    }
+    
     
 }

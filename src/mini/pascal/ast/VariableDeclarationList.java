@@ -11,7 +11,7 @@ import java.util.ArrayList;
  *
  * @author jorgecaballero
  */
-public class VariableDeclarationList {
+public class VariableDeclarationList extends Block{
     public ArrayList<VariableDeclaration> il;
 
     public VariableDeclarationList(VariableDeclaration vd) {
